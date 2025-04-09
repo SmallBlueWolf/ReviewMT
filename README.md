@@ -15,7 +15,7 @@ We believe this work provides a significant advancement in LLM-driven peer-revie
 **For more detailed explanations and examples, please refer to the `appendix.pdf` file.**
 
 <p align="center" width="100%">
-  <img src='./assets/img1.png' alt="Framework Overview Diagram" width="100%">
+  <img src='https://pic1.imgdb.cn/item/67f66f6188c538a9b5c7c5fa.png' alt="Framework Overview Diagram" width="100%">
   <br>
 </p>
 
@@ -108,7 +108,7 @@ The dataset combines data from two primary sources:
 | Data Format            | JSON         | Structured dialogue format             |
 
 <p align="center" width="100%">
-  <img src='./assets/img3.jpg'width="100%">
+  <img src='https://pic1.imgdb.cn/item/67f66f6888c538a9b5c7c5fc.jpg'width="100%">
   <br>
 </p>
 
