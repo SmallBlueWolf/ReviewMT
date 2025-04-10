@@ -4,7 +4,7 @@ Large Language Models (LLMs) have demonstrated wide-ranging applications across 
 
 This project introduces **ReviewMT**, a framework that reformulates the peer-review process as a **multi-turn, role-specific, agent-based dialogue simulation**. We model the key participants – **Authors, Reviewers, and Area Chairs (Decision Makers)** – using distinct LLMs (or a single LLM prompted for specific roles) to simulate their interactions throughout the review lifecycle, including initial reviews, author rebuttals, reviewer discussions, and final decisions.
 
-To facilitate this, we constructed **ReviewMT**, a comprehensive dataset containing over 26,841 papers with 92,017 review instances collected from the ICLR conference (OpenReview) and Nature Communications. This dataset is meticulously structured to train and evaluate LLMs in simulating multi-turn peer-review dialogues.
+To facilitate this, we constructed **ReviewMT**, a comprehensive dataset containing over 30,854 papers with 110,642 review instances collected from the ICLR conference (OpenReview) and NIPS (OpenReview). This dataset is meticulously structured to train and evaluate LLMs in simulating multi-turn peer-review dialogues.
 
 Furthermore, we propose and implement a suite of **role-specific metrics** to evaluate the performance of LLMs acting as Authors, Reviewers, and Area Chairs within this simulated environment, moving beyond simple text generation quality to assess functional correctness and interaction quality.
 
@@ -25,39 +25,25 @@ We believe this work provides a significant advancement in LLM-driven peer-revie
 **Table of Contents**
 
 - [ReviewMT](#reviewmt)
-- [Framework Overview](#framework-overview)
-  - [Role-Specific Agents](#role-specific-agents)
-  - [Multi-Turn Dialogue Simulation](#multi-turn-dialogue-simulation)
-- [The ReviewMT Dataset](#the-reviewmt-dataset)
-  - [Data Sources and Statistics](#data-sources-and-statistics)
-  - [Data Processing Pipeline](#data-processing-pipeline)
-- [Benchmark Results](#benchmark-results)
-  - [Zero-Shot Performance](#zero-shot-performance)
-  - [Fine-tuning Performance (ICLR Data)](#fine-tuning-performance-iclr-data)
-  - [Fine-tuning Performance (Mixed Data)](#fine-tuning-performance-mixed-data)
-  - [Role-Specific Evaluation (Example)](#role-specific-evaluation-example)
-- [File Structure](#file-structure)
-- [Installation](#installation)
-- [How To Use](#how-to-use)
-  - [1. Prepare Datasets](#1-prepare-datasets)
-    - [Make the ReviewMT-ICLR dataset](#make-the-reviewmt-iclr-dataset)
-    - [Make the ReviewMT-NC dataset](#make-the-reviewmt-nc-dataset)
-    - [Prepare Mixed Dataset (Optional)](#prepare-mixed-dataset-optional)
-  - [2. Fine-tune Models](#2-fine-tune-models)
-    - [Model Fine-tuning Configuration Files](#model-fine-tuning-configuration-files)
-    - [Steps for Fine-tuning](#steps-for-fine-tuning)
-  - [3. Merge Adapters (Optional)](#3-merge-adapters-optional)
-    - [Model Merge Configuration Files](#model-merge-configuration-files)
-    - [Steps for Merging](#steps-for-merging)
-  - [4. Run Inference & Simulation](#4-run-inference--simulation)
-    - [Chat with Models via Llama Factory](#chat-with-models-via-llama-factory)
-    - [Run Multi-Turn Simulation](#run-multi-turn-simulation)
-    - [Export Dialogue File](#export-dialogue-file)
-  - [5. Evaluate Performance](#5-evaluate-performance)
-    - [Using the Evaluation Script](#using-the-evaluation-script)
-- [Acknowledgement](#acknowledgement)
-- [Citation](#citation)
-- [Contact](#contact)
+  - [Framework Overview](#framework-overview)
+    - [Role-Specific Agents](#role-specific-agents)
+    - [Multi-Turn Dialogue Simulation](#multi-turn-dialogue-simulation)
+  - [The ReviewMT Dataset](#the-reviewmt-dataset)
+    - [Data Sources and Statistics](#data-sources-and-statistics)
+    - [Data Processing Pipeline](#data-processing-pipeline)
+  - [File Structure](#file-structure)
+  - [Installation](#installation)
+  - [How To Use](#how-to-use)
+    - [Expected Directory Structure](#expected-directory-structure)
+    - [1. Prepare Datasets](#1-prepare-datasets)
+      - [1.1. Download Raw Data (Optional)](#11-download-raw-data-optional)
+      - [1.2. Extract PDF Content by Marker](#12-extract-pdf-content-by-marker)
+      - [1.3. Convert Datasets](#13-convert-datasets)
+    - [2. SFT Finetune](#2-sft-finetune)
+    - [3. DPO Finetune](#3-dpo-finetune)
+    - [4. Run Inference](#4-run-inference)
+    - [5. Evaluate Performance](#5-evaluate-performance)
+  - [Acknowledgement](#acknowledgement)
 
 ---
 
@@ -83,7 +69,12 @@ The simulation captures the iterative nature of peer review:
 2.  **Rebuttal Phase:** The Author Agent receives the reviews and generates a rebuttal.
 3.  **Discussion Phase (Optional):** Reviewer Agents can potentially see the rebuttal and other reviews to discuss or update their assessments.
 4.  **Decision Phase:** The AC Agent receives all reviews and the rebuttal to generate a final decision and meta-review.
+<<<<<<< Updated upstream
+=======
 
+
+
+>>>>>>> Stashed changes
 ---
 
 ## The ReviewMT Dataset
@@ -95,84 +86,91 @@ The **ReviewMT** dataset is the backbone of this project, providing real-world e
 The dataset combines data from two primary sources:
 
 1.  **ICLR (2017-2024):** Sourced from OpenReview, containing papers (PDFs), reviews, meta-reviews, rebuttals, and decisions. This data provides rich multi-turn interactions.
-2.  **Nature Communications (2023):** Sourced from publicly available review files, typically containing the paper, reviewer reports, author responses, and editorial decisions.
+2.  **NIPS (2021-2023):** Sourced from OpenReview, typically containing the paper, reviewer reports, author responses, and editorial decisions.
 
 **Key Statistics:**
 
 | Statistic              | Value        | Notes                                  |
 | :--------------------- | :----------- | :------------------------------------- |
-| Total Papers           | ~26,841+     | Combined from ICLR and NC              |
-| Total Review Instances | ~92,017+     | Includes reviews, rebuttals, decisions |
+| Total Papers           | ~30,854      | Combined from ICLR and NIPS            |
+| Total Review Instances | ~110,642     | Includes reviews, rebuttals, decisions |
 | ICLR Range             | 2017 - 2024  | OpenReview data                        |
-| NC Range               | 2023 (focus) | Public peer review reports             |
+| NIPS Range             | 2021 - 2023  | OpenReview data                        |
 | Data Format            | JSON         | Structured dialogue format             |
 
 <p align="center" width="100%">
+<<<<<<< Updated upstream
+  <img src='./assets/img2.jpg'width="100%">
+=======
   <img src='https://pic1.imgdb.cn/item/67f66f6888c538a9b5c7c5fc.jpg'width="100%">
+>>>>>>> Stashed changes
   <br>
 </p>
 
 
+
 ### Data Processing Pipeline
 
-1.  **Data Crawling:** Scripts (`iclr_webcrawler.py`, `nature_webcrawler.py`) fetch raw data (PDFs, JSON metadata, review reports).
-2.  **PDF to Markdown Conversion:** We utilize the `marker` tool ([VikParuchuri/marker](https://github.com/VikParuchuri/marker)) to convert paper and review PDFs into structured Markdown, significantly improving text extraction quality compared to standard PDF text extraction. This step is crucial for preserving layout and content integrity. (`iclr_convert.py`, `nature_convert.py`).
-3.  **Dialogue Construction:** Scripts (`iclr_make.py`, `nature_make.py`) parse the Markdown/JSON data, identify roles (Author, Reviewer, AC), extract relevant text segments (reviews, rebuttals, decisions), and structure them into multi-turn dialogue JSON format suitable for LLM training. Regular expressions and heuristics are used, especially for parsing the less structured Nature Communications review reports. Unparseable files are logged (see `nature_make.yaml` options).
-4.  **Dataset Splitting:** Data is typically split into training and testing sets (e.g., by year for ICLR, by month for NC, or randomly).
+1.  **Data Crawling:** Scripts (`iclr_webcrawler.py`, `nips_webcrawler.py`) fetch raw data (PDFs, JSON metadata, review reports).
+2.  **PDF to Markdown Conversion:** We utilize the `marker` tool ([VikParuchuri/marker](https://github.com/VikParuchuri/marker)) to convert paper and review PDFs into structured Markdown, significantly improving text extraction quality compared to standard PDF text extraction. This step is crucial for preserving layout and content integrity. (`iclr_convert.py`, `nips_convert.py`).
+3.  **Dialogue Construction:** Scripts (`convert_SFT_data.py`, `convert_DPO_data.py`) parse the Markdown/JSON data, identify roles (Author, Reviewer, AC), extract relevant text segments (reviews, rebuttals, decisions), and structure them into multi-turn dialogue JSON format suitable for LLM training. Regular expressions and heuristics might be used internally, especially for parsing less structured data. Unparseable files might be logged (check script options or outputs). For more details on the specific conversion logic, please refer to the scripts themselves and the `appendix.pdf`.
+4.  **Dataset Splitting:** Data is typically split into training and testing sets (e.g., by year for ICLR, by month for NIPS, or randomly) during the conversion process (e.g., using options in `convert_SFT_data.py`).
 
 ## File Structure
 
 ```bash
-├── configs
-│   ├── iclr_finetune/
-│   ├── iclr_merge/
-│   ├── nature_finetune/
-│   ├── nature_merge/
-│   └── mixed_finetune/dataset
-│   └── mixed_merge/
-├── data
-│   ├── datasets
-│   ├── iclr_test_data.json
-│   ├── nature_test_data.json
-│   └── raw_data
+├── data/
+│   └── tmp/ 
+│       ├── ICLR/
+│       │   ├── 2024/
+│       │   │   └── md/
+│       │   └── ...             # Other year
+│       └── NeurIPS/
+│           ├── 2023/
+│           │   └── md/
+│           └── ...             # Other year
+├── datasets/
+│   ├── reviewmt_test.json
+│   ├── reviewmt_train/
+│   │   ├── chunk_0.json
+│   │   ├── chunk_1.json
+│   │   └── ... 
+│   └── reviewmt_dpo.json
+├── models/
+│   ├── SFT/
+│   │   ├── llama3/
+│   │   ├── qwen/
+│   │   └── ...                 # Other models
+│   └── DPO/
+│       ├── llama3/
+│       ├── qwen/
+│       └── ...                 # Other models
+├── results/
+│   ├── inference_results/
+│   │   ├── llama3/
+│   │   │   ├── raw/
+│   │   │   ├── sft/
+│   │   │   └── dpo/
+│   │   ├── qwen/
+│   │   │   ├── raw/
+│   │   │   ├── sft/
+│   │   │   └── dpo/
+│   │   └── ...                 
+│   └── metric_results/         
+│       ├── llama3/             
+│       │   ├── raw/
+│       │   ├── sft/
+│       │   └── dpo/
+│       ├── qwen/
+│       │   ├── raw/
+│       │   ├── sft/
+│       │   └── dpo/
+│       └── ...                 
+├── configs/
+├── src/ 
 ├── environment.yml
-├── examples
-│   ├── iclr_getrawdata.yaml
-│   ├── iclr_convert.yaml
-│   ├── iclr_make.yaml
-│   ├── nature_getrawdata.yaml
-│   ├── nature_convert.yaml
-│   ├── nature_make.yaml
-│   └── metric.yaml
-├── prompts
-│   └── role_prompts.json
-├── README.md
 ├── requirements.txt
-├── results
-│   ├── simulation_output.json
-│   └── evaluation_results/
-├── scripts
-│   ├── 1a_getRawData_iclr.sh
-│   ├── 1b_getRawData_nature.sh
-│   ├── 2a_convert_iclr.sh
-│   ├── 2b_convert_nature.sh
-│   ├── 3a_make_iclr.sh
-│   ├── 3b_make_nature.sh
-│   ├── 4a_finetune_example.sh
-│   ├── 4b_inference_example.sh
-│   └── 5_metric.sh
-└── src
-    ├── iclr_convert.py
-    ├── iclr_make.py
-    ├── nature_convert.py
-    ├── nature_make.py
-    ├── inference.py
-    ├── metric.py
-    ├── module.py
-    ├── marker/
-    └── webcrawlers/
-        ├── iclr_webcrawler.py
-        └── nature_webcrawler.py
+└── README.md
 ```
 
 ## Installation
@@ -221,178 +219,166 @@ The dataset combines data from two primary sources:
 
 ## How To Use
 
-Follow these steps to replicate the dataset creation, model fine-tuning, and evaluation. **All commands assume you are in the project's root directory.**
+Follow these steps to make datasets, finetune models, run inference, and evaluate performance. **All commands assume you are in the project's root directory.**
+
+### Expected Directory Structure
+
+The project will use the following directory structure during execution. Some directories will be created automatically by the scripts as needed.
+
+| Directory                  | Purpose                                                                 |
+| :------------------------- | :---------------------------------------------------------------------- |
+| `./data/iclr_papers(iclr_reviews)(NeurIPS)`               | Stores raw data downloaded from sources like OpenReview or Kaggle.      |
+| `./data/tmp/`              | Stores intermediate Markdown files converted from PDFs using Marker.    |
+| `./datasets/`              | Stores processed datasets ready for training and evaluation (SFT, DPO, Test). |
+| `./models/SFT/`            | Stores model weights fine-tuned using the SFT method.                   |
+| `./models/DPO/`            | Stores model weights fine-tuned using the DPO method.                   |
+| `./results/inference_results/` | Stores the output files (dialogue records) generated during inference. |
+| `./results/metric_results/`  | Stores the computed metric results from the evaluation step.            |
+| `./configs/`               | Stores internal configuration files. **Typically, users do not need to modify these.** |
+| `./src/`                   | Contains the core Python source code and internal modules. **Typically, users do not need to modify these.** |
 
 ### 1. Prepare Datasets
 
-Choose the dataset(s) you want to generate.
+#### 1.1. Download Raw Data (Optional)
 
-#### Make the ReviewMT-ICLR dataset
+We use data from papers from high-level academic conferences such as **ICLR**, **NeurIPS**, etc. (This is allowed under official ethics rules.) We have uploaded our **Raw Datasets** to the Kaggle platform under the name `smallbluewolf/reviewmt-raw-datasets`. You can run `path = kagglehub.dataset_download("smallbluewolf/reviewmt-raw-datasets")` in Python with the KaggleHub kit or go directly to Kaggle to download it. It's about 116GB in size.
 
-**Quick Start:**
+Here's a simple Python example using `kagglehub`:
+```python
+import kagglehub
 
-```bash
-bash scripts/1a_getRawData_iclr.sh
-bash scripts/2a_convert_iclr.sh
-bash scripts/3a_make_iclr.sh
+# Authenticate (if needed, usually handles automatically if Kaggle CLI is configured)
+# kagglehub.login() 
+
+# Download the dataset
+path = kagglehub.dataset_download("smallbluewolf/reviewmt-raw-datasets")
+
+print(f"Dataset downloaded to: {path}")
+# You might need to unzip/extract the data from the downloaded path
 ```
 
-**Custom Configuration:**
+Since the data from ICLR is the largest among the conferences, we also provide you with the ICLR data download script written using the official `openreview.py` library provided by OpenReview.net, thus saving your network bandwidth. Note: This script downloads data into a directory structure like `./data/iclr_papers`.
 
-- Edit `examples/iclr_getrawdata.yaml` (specify years, paths, proxy).
-- Edit `examples/iclr_convert.yaml` (specify paths, `marker` settings like `workers`, `min_length`). **Note:** Conversion is computationally intensive. Adjust `workers` based on your GPU/CPU resources.
-- Edit `examples/iclr_make.yaml` (specify input/output paths).
-
-#### Make the ReviewMT-NC dataset
-
-**Quick Start:**
+You can run the script below to download ICLR data:
 
 ```bash
-bash scripts/1b_getRawData_nature.sh
-bash scripts/2b_convert_nature.sh
-bash scripts/3b_make_nature.sh
+python download_ICLR.py
 ```
 
-**Custom Configuration:**
+#### 1.2. Extract PDF Content by Marker
 
-- Edit `examples/nature_getrawdata.yaml` (specify paths, proxy).
-- Edit `examples/nature_convert.yaml` (specify paths, `marker` settings). Handles both paper and review PDFs.
-- Edit `examples/nature_make.yaml` (specify paths, optional `train_month` for splitting, path for unrecognized files `inpath4`).
+Due to the complexity of the PDF file format, we need to convert it to Markdown format text so that it can be better learned by the model.
 
-#### Prepare Mixed Dataset (Optional)
+**Marker** is a project specifically designed to convert PDF files to Markdown format data. We provide the `marker_convert.py` script so you can easily convert PDF data to Markdown. You need to specify `in_folder` and `out_folder`, and you can run `python marker_convert.py -h` to get help.
 
-If you want to train on a combination of ICLR and NC data:
+Here is an example command:
+```bash
+python marker_convert.py --in_folder ./data/iclr_papers --out_folder ./data/tmp/ICLR
+```
+Make sure the input directory contains the PDF files you want to convert, and the output directory will be created if it doesn't exist. Adjust the paths according to your actual raw data location and desired temporary directory structure.
 
-1. Generate both datasets individually as described above.
+#### 1.3. Convert Datasets
 
-2. Manually combine the generated `train.json` and `test.json` (or equivalent) files from `data/datasets/iclr` and `data/datasets/nature`. Simple concatenation of the JSON arrays usually works.
+Now we have obtained all the review content in JSON format and paper content in Markdown format. We still need to convert and form them into a proper format that can be input directly to the model.
 
-   ```bash
-   python -c "import json; open('data/datasets/mixed/train.json','w').write(json.dumps(json.load(open('data/datasets/iclr/train.json'))+json.load(open('data/datasets/nature/train.json'))))"
-   python -c "import json; open('data/datasets/mixed/test.json','w').write(json.dumps(json.load(open('data/datasets/iclr/test.json'))+json.load(open('data/datasets/nature/test.json'))))"
-   ```
+> **Remark**: Before starting, please make sure all the PDF files converted to Markdown format have been placed in `./data/tmp/**/**/*.md`. For example: `./data/tmp/ICLR/ICLR_2017_paper_0001/ICLR_2017_paper_0001.md` or `./data/tmp/NeurIPS/_0kknjKJ6BH/_0kknjKJ6BH.md`.
 
-3. Update the dataset paths in your fine-tuning configuration files (`configs/mixed_finetune/*.yaml`) to point to these combined files.
+- **SFT Datasets**
+  - Run:
+    ```bash
+    python convert_SFT_data.py
+    ```
+  - Optional arguments:
+    - `--split` (default=True)
+      - Whether you need to split datasets into training and testing parts.
+    - `--num_of_test` (default=100)
+      - How many samples you want to assign to the test dataset. (If `--split` is False, then this argument is invalid.)
+    - `--chunk_size` (default=2000)
+      - The chunk size of the training datasets.
+    - `--statistic` (default=False)
+      - Whether you need statistical data of the datasets. If it's your first time running this, `True` is highly recommended.
+    - `--shuffle` (default=True)
+      - Whether to shuffle the order of the datasets.
+  
+- **DPO Datasets**
+  - Run:
+    ```bash
+    python convert_DPO_data.py
+    ```
 
-### 2. Fine-tune Models
+After this step (with default settings), you should see `reviewmt_test.json`, `reviewmt_train`, and `reviewmt_dpo.json` in the `./datasets` directory.
 
-We use **Llama Factory** for efficient fine-tuning (LoRA is recommended).
+### 2. SFT Finetune
 
-#### Model Fine-tuning Configuration Files
+We use **Llama Factory** for efficient fine-tuning (LoRA is recommended). 
 
-Configuration files for various models and datasets are provided in the `configs/` directory:
-
-- `configs/iclr_finetune/`: For ICLR dataset.
-- `configs/nature_finetune/`: For Nature Communications dataset.
-- `configs/mixed_finetune/`: For the combined dataset.
-
-Example: `configs/mixed_finetune/llama3_lora_sft_llama3.yaml`
-
-**Key parameters to check/modify in YAML:**
-
-- `model_name_or_path`: Base model identifier.
-- `dataset`: Name of the dataset registered in Llama Factory (defined in `data_info.json`) or path(s) to your custom dataset files (e.g., `data/datasets/mixed/train.json`).
-- `template`: Prompt template (e.g., `llama3`, `qwen`, `glm4`).
-- `finetuning_type`: `lora` (recommended).
-- `lora_target`: Modules to apply LoRA (e.g., `q_proj,v_proj` or `all`).
-- `output_dir`: Where to save checkpoints and adapters.
-- `per_device_train_batch_size`, `gradient_accumulation_steps`, `learning_rate`, `num_train_epochs`.
-- `fp16` or `bf16`: Enable mixed-precision training.
-
-#### Steps for Fine-tuning
-
-1. **(Optional) Register Custom Dataset:** If using custom file paths not defined in Llama Factory's default `dataset_info.json`, you might need to point directly to the files in the YAML or update Llama Factory's dataset definitions.
-
-2. **Run Training:**
-
-   ```bash
-   # Example using a config file for Llama-3 on the mixed dataset
-   CUDA_VISIBLE_DEVICES=0,1 llamafactory-cli train configs/mixed_finetune/llama3_lora_sft_llama3.yaml
-   ```
-
-   - Adjust `CUDA_VISIBLE_DEVICES` based on your available GPUs.
-   - Trained LoRA adapters will be saved in the `output_dir` specified in the YAML (e.g., `saves/Llama-3-8B-Instruct/lora/sft`).
-
-### 3. Merge Adapters (Optional)
-
-To get a standalone model with LoRA weights merged:
-
-#### Model Merge Configuration Files
-
-Located alongside finetuning configs (e.g., `configs/mixed_merge/`). These typically specify the base model, the adapter path, and the output path for the merged model.
-
-#### Steps for Merging
-
-1. **Run Export:**
-
-   ```bash
-   # Example merging Llama-3 adapters trained on mixed data
-   CUDA_VISIBLE_DEVICES=0 llamafactory-cli export configs/mixed_merge/llama3_lora_sft_llama3.yaml
-   ```
-
-   - Ensure `adapter_name_or_path` points to your trained adapters.
-   - Specify `export_dir` for the merged model output.
-   - Set `export_quantization_bit` if you want to quantize during merge.
-
-### 4. Run Inference & Simulation
-
-#### Chat with Models via Llama Factory
-
-Use Llama Factory's web UI or CLI for interactive testing:
+You can run the script below to start the SFT training stage:
 
 ```bash
-# Example: Launch web UI for the fine-tuned Llama-3 model (merged or with adapter)
-CUDA_VISIBLE_DEVICES=0 llamafactory-cli webchat configs/mixed_merge/llama3_lora_sft_llama3.yaml
-# Or specify adapter path if not merged
-# CUDA_VISIBLE_DEVICES=0 llamafactory-cli webchat --model_name_or_path meta-llama/Meta-Llama-3-8B-Instruct --adapter_name_or_path saves/Llama-3-8B-Instruct/lora/sft --template llama3
+python train_SFT.py
 ```
 
-#### Run Multi-Turn Simulation
+- Optional arguments:
+  - `--models`
+    - The model(s) you want to download and finetune with SFT. Please choose from: `['llama3', 'qwen', 'baichuan2', 'gemma', 'deepseek', 'yuan2', 'chatglm3', 'falcon', 'yi_1.5', 'glm4', 'qwen2', 'gemma2']`. If you don't specify, all models will be chosen by default. Please specify like `--models llama3 qwen falcon`.
+  - `--batch_size` (default=2)
+    - The batch size per device for finetuning.
 
-Use the provided `src/inference.py` script for simulating the review process.
+The script automatically checks if there is already a downloaded model file, but it does not check its integrity and overwrites the download by default.
+
+All trained weight files will be stored in the `./models/SFT` directory.
+
+### 3. DPO Finetune
+
+You can run the script below to start the DPO finetuning stage:
 
 ```bash
-python src/inference.py \
-    --model_name_or_path /path/to/your/finetuned_or_merged_model \
-    --adapter_path /path/to/lora/adapters \
-    --test_file data/iclr_test_data.json \
-    --output_file results/simulation_output.json \
-    --role_prompts_file prompts/role_prompts.json \
-    --max_new_tokens 1024
+python train_DPO.py
 ```
 
-#### Export Dialogue File
+- Optional arguments:
+  - `--models`
+    - The model(s) you want to download and finetune with DPO. Please choose from: `['llama3', 'qwen', 'baichuan2', 'gemma', 'deepseek', 'yuan2', 'chatglm3', 'falcon', 'yi_1.5', 'glm4', 'qwen2', 'gemma2']`. If you don't specify, all models will be chosen by default. Please specify like `--models llama3 qwen falcon`.
+  - `--batch_size` (default=1)
+    - The batch size per device for finetuning.
 
-The inference script should ideally output the simulated dialogues in a structured format (e.g., JSON) for evaluation.
+All trained weight files will be stored in the `./models/DPO` directory.
+
+### 4. Run Inference
+
+You can run the script below to perform inference:
+
+```bash
+python inference.py
+```
+
+- Optional arguments:
+  - `--models`
+    - The model(s) you want to perform inference with. Please choose from: `['llama3', 'qwen', 'baichuan2', 'gemma', 'deepseek', 'yuan2', 'chatglm3', 'falcon', 'yi_1.5', 'glm4', 'qwen2', 'gemma2']`. If you don't specify, all models will be chosen by default. Please specify like `--models llama3 qwen falcon`.
+  - `--type_model`
+    - The type of the model you want to use for inference. Please choose from: `['sft', 'raw', 'dpo']`. If you don't specify, all models will be chosen by default.
+  - `--workers` (default=6)
+    - The number of processes working in parallel.
+  - `--number_of_inference` (default=100)
+    - The number of papers from the test dataset to perform inference on.
+
+All inference record files will be stored in the `./results/inference_results` directory.
 
 ### 5. Evaluate Performance
 
-Use the `src/metric.py` script to calculate performance metrics based on the ground truth test data and the simulation output.
-
-#### Using the Evaluation Script
-
-**Custom Configuration:**
-
-- Edit `examples/metric.yaml`:
-
-  ```yaml
-  ground_truth_file: data/iclr_test_data.json
-  prediction_file: results/simulation_output.json
-  output_dir: results/evaluation_results
-  metrics:
-    - hit_rate
-    - review_quality_score
-    - decision_accuracy
-    - rebuttal_strength
-  ```
-
-**Run Evaluation:**
+You can run the script below to compute the metrics:
 
 ```bash
-python src/metric.py --config examples/metric.yaml
+python metric.py
 ```
 
-The script will compare the model's generated outputs (reviews, rebuttals, decisions) against the ground truth data and report the specified metrics.
+- Optional arguments:
+  - `--models`
+    - The model(s) you want to evaluate. Please choose from: `['llama3', 'qwen', 'baichuan2', 'gemma', 'deepseek', 'yuan2', 'chatglm3', 'falcon', 'yi_1.5', 'glm4', 'qwen2', 'gemma2']`. If you don't specify, all models will be chosen by default. Please specify like `--models llama3 qwen falcon`.
+  - `--type_model`
+    - The type of the model you want to evaluate. Please choose from: `['sft', 'raw', 'dpo']`. If you don't specify, all models will be chosen by default.
+
+All metric results will be printed and also stored in the `./results/metric_results` directory. For detailed information on the specific metrics calculated and their interpretation, please refer to the `appendix.pdf`.
 
 ---
 
@@ -400,8 +386,7 @@ The script will compare the model's generated outputs (reviews, rebuttals, decis
 
 This work leverages several open-source projects and datasets. We specifically thank:
 
--   The creators and maintainers of **OpenReview** for providing public access to ICLR review data.
--   The publishers of **Nature Communications** for making peer review reports publicly available.
+-   The creators and maintainers of **OpenReview** for providing public access to ICLR and NIPS review data.
 -   The developers of the **LLaMA Factory** ([hiyouga/LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory)) for their excellent and user-friendly fine-tuning framework.
 -   The creators of the **marker** tool ([VikParuchuri/marker](https://github.com/VikParuchuri/marker)) for high-quality PDF-to-Markdown conversion.
 -   Hugging Face for the `transformers`, `datasets`, and model hub infrastructure.
