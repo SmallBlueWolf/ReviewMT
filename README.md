@@ -69,12 +69,7 @@ The simulation captures the iterative nature of peer review:
 2.  **Rebuttal Phase:** The Author Agent receives the reviews and generates a rebuttal.
 3.  **Discussion Phase (Optional):** Reviewer Agents can potentially see the rebuttal and other reviews to discuss or update their assessments.
 4.  **Decision Phase:** The AC Agent receives all reviews and the rebuttal to generate a final decision and meta-review.
-<<<<<<< Updated upstream
-=======
 
-
-
->>>>>>> Stashed changes
 ---
 
 ## The ReviewMT Dataset
@@ -99,13 +94,11 @@ The dataset combines data from two primary sources:
 | Data Format            | JSON         | Structured dialogue format             |
 
 <p align="center" width="100%">
-<<<<<<< Updated upstream
-  <img src='./assets/img2.jpg'width="100%">
-=======
   <img src='https://pic1.imgdb.cn/item/67f66f6888c538a9b5c7c5fc.jpg'width="100%">
 >>>>>>> Stashed changes
   <br>
 </p>
+
 
 
 
